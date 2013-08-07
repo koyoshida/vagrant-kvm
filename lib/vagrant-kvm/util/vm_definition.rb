@@ -13,7 +13,7 @@ module VagrantPlugins
         attr_accessor :disk
         attr_reader :mac
         attr_reader :arch
-        attr_reader :network
+        attr_accessor :network
         attr_accessor :image_type
 
         def self.list_interfaces(definition)
@@ -41,7 +41,7 @@ module VagrantPlugins
         def initialize(definition, source_type='libvirt')
           @uuid = nil
           @gui = nil
-          @network = 'default'
+          @network = 'vagrant-default'
           if source_type == 'ovf'
             create_from_ovf(definition)
           else

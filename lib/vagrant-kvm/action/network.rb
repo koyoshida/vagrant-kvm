@@ -34,7 +34,14 @@ module VagrantPlugins
             options = {
               :base_ip => base_ip,
               :netmask => "255.255.255.0",
-              :range   => range
+              :range   => range,
+              :name    => "vagrant-" + addr[2].to_s,
+              :domain_name => "vagrant.local"
+            }.merge(options)
+          else
+            options = {
+              :name        => "vagrant-default",
+              :domain_name => "vagrant.local"
             }.merge(options)
           end
 

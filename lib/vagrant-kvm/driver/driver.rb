@@ -37,7 +37,6 @@ module VagrantPlugins
           @uuid = uuid
           # This should be configurable
           @pool_name = "vagrant"
-          @network_name = "vagrant"
 
           # Open a connection to the qemu driver
           begin
@@ -156,18 +155,20 @@ module VagrantPlugins
         def create_network(config)
           begin
             # Get the network if it exists
-            @network = @conn.lookup_network_by_name(@network_name)
-            definition = Util::NetworkDefinition.new(@network_name,
+            network_name = config[:name]
+            @network = @conn.lookup_network_by_name(network_name)
+            return if @network.active?
+
+            definition = Util::NetworkDefinition.new(network_name,
                                                      @network.xml_desc)
-            @network.destroy if @network.active?
             @network.undefine
           rescue Libvirt::RetrieveError
             # Network doesn't exist, create with defaults
-            definition = Util::NetworkDefinition.new(@network_name)
+            definition = Util::NetworkDefinition.new(network_name)
           end
           definition.configure(config)
           @network = @conn.define_network_xml(definition.as_xml)
-          @logger.info("Creating network #{@network_name}")
+          @logger.info("Creating network #{network_name}")
           @network.create
         end
 
@@ -237,7 +238,7 @@ module VagrantPlugins
         end
 
         def set_name(name)
-          @name = name
+          @name=name
         end
 
         def set_mac_address(mac)
