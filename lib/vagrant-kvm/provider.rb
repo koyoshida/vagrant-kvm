@@ -54,18 +54,19 @@ module VagrantPlugins
         }
       end
 
-      # XXX duplicated from prepare_nfs_settings
       # Returns the IP address of the guest by looking at the first
       # enabled host only network.
       #
       # @return [String]
       def read_machine_ip
-        @machine.config.vm.networks.each do |type, options|
-          if type == :private_network && options[:ip].is_a?(String)
-            return options[:ip]
-          end
-        end
+        ip = @driver.read_machine_ip
+        return ip if ip
 
+        # fall down to box.xml definition
+        @machine.config.vm.networks.each do |type, options|
+          return options[:ip] if type == :private_network &&
+                                  options[:ip].is_a?(String)
+        end
         nil
       end
 

@@ -172,6 +172,20 @@ module VagrantPlugins
           @network.create
         end
 
+        def read_machine_ip
+          domain = @conn.lookup_domain_by_uuid(@uuid)
+          definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
+          mac_address = definition.mac
+          network_name = definition.network
+          network = @conn.lookup_network_by_name(network_name)
+          network_definition = Util::NetworkDefinition.new(network_name,
+                                                     network.xml_desc)
+          network_definition.hosts.each do |host|
+            return host[:ip] if mac_address == host[:mac]
+          end
+          nil
+        end
+
         # Initialize or create storage pool
         def init_storage(base_path)
           begin

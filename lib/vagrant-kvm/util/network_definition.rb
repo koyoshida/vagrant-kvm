@@ -9,6 +9,7 @@ module VagrantPlugins
         attr_reader :name
         attr_reader :domain_name
         attr_reader :base_ip
+        attr_reader :hosts
 
         def initialize(name, definition=nil)
           @name = name

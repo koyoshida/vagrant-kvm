@@ -20,8 +20,8 @@ module VagrantPlugins
 
           if using_nfs
             @logger.info("Using NFS, preparing NFS settings by reading host IP and machine IP")
-            env[:nfs_host_ip]    = read_host_ip(env[:machine])
-            env[:nfs_machine_ip] = read_machine_ip(env[:machine])
+            env[:nfs_host_ip]    = read_host_ip(env)
+            env[:nfs_machine_ip] = read_machine_ip(env)
 
             raise Vagrant::Errors::NFSNoHostonlyNetwork if !env[:nfs_machine_ip]
           end
@@ -29,10 +29,9 @@ module VagrantPlugins
 
         # Returns the IP address of the first host only network adapter
         #
-        # @param [Machine] machine
         # @return [String]
-        def read_host_ip(machine)
-          ip = read_machine_ip(machine)
+        def read_host_ip(env)
+          ip = read_machine_ip(env)
           if ip
             base_ip = ip.split(".")
             base_ip[3] = "1"
@@ -46,8 +45,9 @@ module VagrantPlugins
         # enabled host only network.
         #
         # @return [String]
-        def read_machine_ip(machine)
-          machine.config.vm.networks.each do |type, options|
+        def read_machine_ip(env)
+          return env[:machine_ip] if env[:machine_ip]
+          env[:machine].config.vm.networks.each do |type, options|
             if type == :private_network && options[:ip].is_a?(String)
               return options[:ip]
             end

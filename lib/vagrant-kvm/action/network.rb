@@ -57,6 +57,9 @@ module VagrantPlugins
 
           env[:ui].info I18n.t("vagrant.actions.vm.network.preparing")
           env[:machine].provider.driver.create_network(options)
+          network_name = options[:domain_name]
+          env[:machine].provider.driver.set_network_names(network_name)
+          env[:machine_ip] = options[:ip]
 
           @app.call(env)
         end
