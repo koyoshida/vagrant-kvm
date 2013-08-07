@@ -271,6 +271,14 @@ module VagrantPlugins
           @conn.define_domain_xml(definition.as_libvirt)
         end
 
+        def add_nic(nic)
+          domain = @conn.lookup_domain_by_uuid(@uuid)
+          definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
+          definition.add_nic(nic)
+          domain.undefine
+          @conn.define_domain_xml(definition.as_libvirt)
+        end
+
         # Starts the virtual machine.
         def start
           domain = @conn.lookup_domain_by_uuid(@uuid)

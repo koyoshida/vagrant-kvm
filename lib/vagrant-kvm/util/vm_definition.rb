@@ -42,6 +42,7 @@ module VagrantPlugins
           @uuid = nil
           @gui = nil
           @network = 'vagrant-default'
+          @nics = []
           if source_type == 'ovf'
             create_from_ovf(definition)
           else
@@ -117,7 +118,31 @@ module VagrantPlugins
             :image_type => @image_type,
             :qemu_bin => qemu_bin.detect { |binary| File.exists? binary }
           })
+          xml = inject_nics(xml) if @nics.length > 0
           xml
+        end
+
+        def inject_nics(xml)
+          doc = Nokogiri::XML(xml)
+          primary_nic = doc.at_css("interface")
+          @nics.each do |nic|
+            next if nic[:mac] == format_mac(@mac)
+            primary_nic.add_next_sibling "<interface type='interface'><mac address='#{nic[:mac]}'/><source network='#{nic[:network]}'/><model type='virtio'/></interface>"
+          end
+          doc.to_xml
+        end
+
+        def add_nic(nic)
+          mac = format_mac(nic[:mac])
+          cur_nic = @nics.detect {|n| n[:mac] == mac}
+          if cur_nic
+            cur_nic[:network] = nic[:network]
+          else
+            @nics << {
+              :mac     => mac,
+              :network => nic[:network]
+              }
+          end
         end
 
         def get_memory(unit="bytes")
