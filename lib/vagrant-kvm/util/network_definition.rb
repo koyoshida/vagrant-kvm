@@ -91,6 +91,20 @@ module VagrantPlugins
           xml
         end
 
+        def already_exist_host?(config)
+          @hosts.each do |host|
+            return true if host[:mac]==config[:mac]
+          end
+          false
+        end
+
+        def already_exist_ip?(config)
+          @hosts.each do |host|
+            return true if host[:ip]==config[:ip]
+          end
+          false
+        end
+
         def add_host(host)
           cur_host = @hosts.detect {|h| h[:mac] == host[:mac]}
           if cur_host
