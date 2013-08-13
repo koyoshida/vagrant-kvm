@@ -83,6 +83,14 @@ module VagrantPlugins
           xml
         end
 
+        def as_host_xml
+          xml = ""
+          @hosts.each do |host|
+            xml = xml + "<host mac='#{host[:mac]}' name='#{host[:name]}' ip='#{host[:ip]}' />"
+          end
+          xml
+        end
+
         def add_host(host)
           cur_host = @hosts.detect {|h| h[:mac] == host[:mac]}
           if cur_host

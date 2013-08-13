@@ -156,20 +156,29 @@ module VagrantPlugins
           begin
             # Get the network if it exists
             network_name = config[:name]
+            hosts = config[:hosts]
             @network = @conn.lookup_network_by_name(network_name)
-            return if @network.active?
-
             definition = Util::NetworkDefinition.new(network_name,
-                                                     @network.xml_desc)
-            @network.undefine
+                                                @network.xml_desc)
+            update_command = Libvirt::Network::NETWORK_UPDATE_COMMAND_ADD_LAST
+            hosts.each do |host|
+              update_command = Libvirt::Network::NETWORK_UPDATE_COMMAND_MODIFY if definition.already_exist_host?(host)
+            end
+            definition.configure(config)
+            @logger.info ("Updating network #{network_name}")
+            @network.update(update_command,
+                            Libvirt::Network::NETWORK_SECTION_IP_DHCP_HOST,
+                            -1,
+                            definition.as_host_xml,
+                            Libvirt::Network::NETWORK_UPDATE_AFFECT_CURRENT)
           rescue Libvirt::RetrieveError
             # Network doesn't exist, create with defaults
             definition = Util::NetworkDefinition.new(network_name)
+            definition.configure(config)
+            @network = @conn.define_network_xml(definition.as_xml)
+            @logger.info("Creating network #{network_name}")
+            @network.create
           end
-          definition.configure(config)
-          @network = @conn.define_network_xml(definition.as_xml)
-          @logger.info("Creating network #{network_name}")
-          @network.create
         end
 
         def read_machine_ip
