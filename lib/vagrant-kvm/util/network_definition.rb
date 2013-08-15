@@ -70,7 +70,6 @@ module VagrantPlugins
           xml = <<-EOXML
             <network>
               <name>#{@name}</name>
-              <forward mode='#{@forward}'/>
               <domain name='#{@domain_name}'/>
               <ip address='#{@base_ip}' netmask='#{@netmask}'>
                 <dhcp>
@@ -79,8 +78,16 @@ module VagrantPlugins
               </ip>
             </network>
           EOXML
+          xml = inject_forward_to_xml(xml) if @forward
           xml = inject_hosts(xml) if @hosts.length > 0
           xml
+        end
+
+        def inject_forward_to_xml(xml)
+          doc = Nokogiri::XML(xml)
+          entry_point = doc.at_css("network name")
+          entry_point.add_next_sibling "<forward mode='#{@forward}'/>"
+          doc.to_xml
         end
 
         def as_host_xml
