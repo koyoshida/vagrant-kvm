@@ -59,7 +59,11 @@ module VagrantPlugins
             @base_ip = config[:base_ip]
             @netmask = config[:netmask]
             @range = config[:range]
-            @hosts = config[:hosts]
+            if config[:hosts]
+              config[:hosts].each do |host|
+                add_host(host)
+              end
+            end
         end
 
         def as_xml
