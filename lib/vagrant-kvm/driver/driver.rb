@@ -307,6 +307,26 @@ module VagrantPlugins
           domain.managed_save
         end
 
+        # Snapshot operation support
+        #
+        # @return [String] status message
+        def snapshot(uuid, *args)
+          domain = @conn.lookup_domain_by_uuid(@uuid)
+          case args[:action]
+          when :take
+            args[:name]
+          when :list
+          when :delete
+            args[:name]
+          when :restorecurrent
+          when :restore
+            args[:name]
+          else
+            raise Vagrant::Errors::KvmInvalidSnapshotAction,
+              :action=>args[:action]
+          end
+        end
+
         # Verifies that the driver is ready and the connection is open
         #
         # This will raise a VagrantError if things are not ready.
