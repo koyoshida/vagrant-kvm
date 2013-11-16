@@ -307,20 +307,70 @@ module VagrantPlugins
           domain.managed_save
         end
 
+        # Snapshot sub commands
+        def take_snapshot(name)
+            domain = @conn.lookup_domain_by_uuid(@uuid)
+            definition = Util::VmDefinition.new(domain.xml_desc, 'libvirt')
+            old_disk = definition.disk
+            new_disk = File.basename(old_disk, File.extname(old_disk)) + "-" +
+            Time.now.to_i.to_s + ".img"
+            new_path = File.join(File.dirname(old_disk), new_disk)
+            definition = Util::SnapshotDefinition.new(old_disk)
+            xml = definition.as_libvirt(name, new_path)
+            @snap = domain.snapshot_create_xml(xml)
+        end
+        def delete_snapshot(name)
+            domain = @conn.lookup_domain_by_uuid(@uuid)
+            if !@snap
+              raise Vagrant::Errors::KvmSnapshotError,
+                :action=>args[:action]
+            end
+            if @snap.name == name
+              @snap.delete
+            else
+              raise Vagrant::Errors::KvmSnapshotError,
+                :action=>args[:action]
+            end
+        end
+        def restore_snapshot(name)
+            # FIXME does ruby-libvirt have revert?
+            domain = @conn.lookup_domain_by_uuid(@uuid)
+            new_snap = domain.lookup_snapshot_by_name(name)
+            if new_snap
+              new_snap.revert
+            else
+              raise Vagrant::Errors::KvmSnapshotError,
+                :action=>args[:action]
+            end
+        end
+        def restore_current_snapshot
+            # FIXME does ruby-libvirt have revert?
+            domain = @conn.lookup_domain_by_uuid(@uuid)
+            if @snap.current?
+              @snap.revert
+            else
+              raise Vagrant::Errors::KvmSnapshotError,
+                :action=>args[:action]
+            end
+        end
+
         # Snapshot operation support
-        #
-        # @return [String] status message
         def snapshot(uuid, *args)
-          domain = @conn.lookup_domain_by_uuid(@uuid)
+          if uuid != @uuid
+            raise Vagrant::Errors::KvmInvalidId
+          end
           case args[:action]
           when :take
-            args[:name]
+            take_snapshot(args[:name])
           when :list
+            domain = @conn.lookup_domain_by_uuid(@uuid)
+            domain.list_snapshots
           when :delete
-            args[:name]
+            delete_snapshot(args[:name])
           when :restorecurrent
+            restore_current_snapshot
           when :restore
-            args[:name]
+            restore_snapshot(args[:name])
           else
             raise Vagrant::Errors::KvmInvalidSnapshotAction,
               :action=>args[:action]

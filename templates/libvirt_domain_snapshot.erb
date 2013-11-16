@@ -1,0 +1,13 @@
+<domainsnapshot>
+<% if name %>
+  <name><%= name %></name>
+<% end %>
+  <description><%= description %></description>
+  <disks>
+  <% disks.each do |disk| %>
+    <disk name='<%= disk.old %>'>
+      <source file='<%= disk.new %>'/>
+    </disk>
+  <% end %>
+  </disks>
+</domainsnapshot>
