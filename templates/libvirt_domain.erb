@@ -43,7 +43,7 @@
     </controller>
     <interface type='network'>
       <mac address='<%= mac %>'/>
-      <source network='vagrant'/>
+      <source network='<%= network %>'/>
       <% unless network_model == :default %>
       <model type='<%= network_model %>'/>
       <% end %>

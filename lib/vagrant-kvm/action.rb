@@ -20,6 +20,7 @@ module VagrantPlugins
           b.use NFS
           b.use PrepareNFSSettings
           b.use SetHostname
+          b.use SetNetworkName
           #b.use Customize
           b.use ForwardPorts
           b.use Boot
@@ -273,6 +274,7 @@ module VagrantPlugins
       autoload :PruneNFSExports, action_root.join("prune_nfs_exports")
       autoload :Resume, action_root.join("resume")
       autoload :SetName, action_root.join("set_name")
+      autoload :SetNetworkName, action_root.join("set_network_name")
       autoload :SetupPackageFiles, action_root.join("setup_package_files")
       autoload :ShareFolders, action_root.join("share_folders")
       autoload :Suspend, action_root.join("suspend")

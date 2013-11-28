@@ -168,7 +168,8 @@ module VagrantPlugins
             :image_type => "qcow2",
             :qemu_bin => "/usr/bin/qemu",
             :disk => volume.path,
-            :name => @name
+            :name => @name,
+            :network_name => @network_name
           }.merge(args)
           definition.update(args)
           # create vm
@@ -182,6 +183,9 @@ module VagrantPlugins
         # Create network
         def create_network(config)
           begin
+            if config.has_key?(:network_name)
+              @network_name=config[:network_name]
+            end
             # Get the network if it exists
             @network = @conn.lookup_network_by_name(@network_name)
             definition = Util::NetworkDefinition.new(@network_name,
@@ -302,7 +306,7 @@ module VagrantPlugins
         end
 
         def set_mac_address(mac)
-          update_domain_xml(:mac => mac)
+          update_domain_xml(:mac => mac, :network => @network_name)
         end
 
         def set_gui(vnc_port, vnc_autoport, vnc_password)
@@ -316,6 +320,11 @@ module VagrantPlugins
 
         def set_diskbus(disk_bus)
           update_domain_xml(:disk_bus => disk_bus)
+        end
+
+        def set_network_name(network_name)
+          @network_name=network_name
+          update_domain_xml(:network => network_name)
         end
 
         def update_domain_xml(options)
