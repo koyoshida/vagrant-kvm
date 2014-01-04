@@ -94,6 +94,7 @@ set to vga.
 * `image_mode` - Possible value are `clone` or `cow`, defaults to `cow`. If set
 to `clone`, the image disk will be copied rather than use the original box
 image. This is slower but allows multiple VMs to be booted at the same time.
+*  network - Add network name for vagrant default network.
 
 ## Specs
 
